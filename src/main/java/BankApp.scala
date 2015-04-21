@@ -1,68 +1,7 @@
-import java.text.SimpleDateFormat
-import java.util.Calendar
-
 import akka.actor._
 import akka.actor.ReceiveTimeout
 import scala.concurrent.duration._
 import scala.language.postfixOps
-
-case object PingMessage
-case object PongMessage
-case object StartMessage
-case object StopMessage
-case class nextValue(value: Int)
-
-class Ping(pong: ActorRef, num: Int, name: String) extends Actor {
-  var mult = num
-  def incrementAndPrint { mult -= 1; println(name + "  " + mult) }
-  def receive = {
-    case StartMessage =>
-      incrementAndPrint
-      pong ! PingMessage
-    case PongMessage =>
-      incrementAndPrint
-      if (mult <= 0) {
-        sender ! StopMessage
-        println("ping stopped")
-        context.stop(self)
-      } else {
-        sender ! PingMessage
-      }
-  }
-}
-
-class Pong extends Actor {
-  def receive = {
-    case PingMessage =>
-      println("  pong")
-      sender ! PongMessage
-    case StopMessage =>
-      println("pong stopped")
-      context.stop(self)
-  }
-}
-
-class Factorial (act: ActorRef, num : Int) extends Actor {
-  var mult = num+1
-   
-  def decrement {mult -= 1}
-
-  def receive = {
-    case StartMessage =>
-      act ! nextValue(1)
-    case nextValue(number) =>
-      decrement
-      if (mult > 0) {
-        act ! nextValue(number * mult)
-      } else {
-        println(number)
-
-        //context.system.actorOf(Props(new Factorial(self,5)), name = "fact" + Math.random()) ! StartMessage
-
-        context.stop(self)
-      }
-  }
-}
 
 object Bank {
   private case object nextClient
@@ -205,22 +144,5 @@ object Bank {
 }
 
 object BankApp extends App {
-/*
-  val poingPongsystem = ActorSystem("poingPongsystem")
-  val pong = poingPongsystem.actorOf(Props[Pong], name = "pong")
-  val ping = poingPongsystem.actorOf(Props(new Ping(pong, 10, "ping1")), name = "ping")
-  val ping2 = poingPongsystem.actorOf(Props(new Ping(pong, 7, "ping2")), name = "ping2")
-  // start them going
-  ping ! StartMessage
-  ping2 ! StartMessage
-*/
-
-/*
-  val factorialSystem = ActorSystem("factorialSystem")
-  val fact: ActorRef = factorialSystem.actorOf(Props(new Factorial(fact,5)), name = "fact")
-
-  fact ! StartMessage
-*/
-
   Bank.start
 }
