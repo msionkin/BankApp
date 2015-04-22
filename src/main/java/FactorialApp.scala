@@ -18,7 +18,7 @@ class Factorial (act: ActorRef, num : Int) extends Actor {
         act ! nextValue(number * mult)
       } else {
         println(number)
-        context.stop(context.parent)
+        context.system.shutdown()
       }
   }
 }

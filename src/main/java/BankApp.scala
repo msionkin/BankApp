@@ -106,18 +106,18 @@ object Bank {
       serviceWindowActorsMap(sw) = context.actorOf(ServiceWindowActor.props(sw), name = sw.name)
     }
 
-    //TODO: stop all system by interview all serviceWindows that they haven't any queue (mailbox is empty),
-    //and then delete ReceiveTimeout
     def receive = {
       case newClient(client) =>
         selectServiceWindowFor(client) forward serve(client)
-        context.setReceiveTimeout(timeForIssueMS milliseconds)
+        context.setReceiveTimeout(2*timeForIssueMS milliseconds)
 
       case ReceiveTimeout =>
         if(serviceWindows.forall(_.clientsInQueueCount == 0)) {
-          bankSystem.awaitTermination()
+          println("All clients have served, all windows is free")
+          println("Bank is closed")
+          bankSystem.shutdown()
         } else {
-          println("not all queues in windows are empty")
+          println("Not all queues in windows are empty")
         }
     }
 
