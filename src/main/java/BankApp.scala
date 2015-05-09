@@ -66,14 +66,14 @@ object Bank {
 
   //"фабрика" клиентов, генерирующая определенное число новых клиентов случайным образом
   private class ClientsFactory(distributor: ActorRef) extends Actor {
-    val clientIssueTypes = List("issue1", "issue2", "issue3" /*"insolubleIssue"*/)
+    val clientIssueTypes = List("issue1", "issue2", "issue3", "insolubleIssue")
 
     var random = scala.util.Random
     var randTimeToCome = 0
     var randTimeForIssue = 0
     var randIssueType = ""
     var clientsCount = 0  //количество сгенерированных клиентов
-    val maxClientsCount = 24 //максимальное количество клиентов
+    val maxClientsCount = 15 //максимальное количество клиентов
 
     def receive = {
       //сообщение о том, что надо сгенерировать нового клиента
@@ -143,8 +143,9 @@ object Bank {
         goodWindow.incClientsCount()                          //увеличиваем количество человек в этом окне на одного
         return serviceWindowActorsMap(goodWindow)
       } else {                                                 //если таких окон нет, то
-        var sw = serviceWindows.filter(_.isCanServe("info window")) //выбираем справочное окно
-        return serviceWindowActorsMap(sw.head)
+        var sw = serviceWindows.filter(_.isCanServe("info window")).head //выбираем справочное окно
+        sw.incClientsCount()
+        return serviceWindowActorsMap(sw)
       }
     }
   }
